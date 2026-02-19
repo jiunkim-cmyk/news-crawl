@@ -67,7 +67,11 @@ def print_summary(articles: List[Dict]):
 def main():
     parser = argparse.ArgumentParser(description="다리마티 뉴스 크롤러")
     parser.add_argument(
-        "-k", "--keyword", default="다리마티", help="검색 키워드 (기본: 다리마티)"
+        "-k",
+        "--keyword",
+        nargs="+",
+        default=["다리마티"],
+        help="검색 키워드 (복수 가능, 기본: 다리마티)",
     )
     parser.add_argument(
         "-p", "--pages", type=int, default=3, help="네이버 검색 페이지 수 (기본: 3)"
@@ -79,18 +83,36 @@ def main():
         default="all",
         help="크롤링 소스 (기본: all)",
     )
+    parser.add_argument(
+        "-l",
+        "--lang",
+        choices=["ko", "en", "both"],
+        default="both",
+        help="Google News 언어 설정 (기본: both)",
+    )
     args = parser.parse_args()
 
-    print(f"키워드: '{args.keyword}' 뉴스 수집 시작\n")
+    keywords = args.keyword
+    print(f"키워드: {keywords} 뉴스 수집 시작\n")
     all_articles = []
 
-    if args.source in ("all", "naver"):
-        naver = NaverNewsCrawler(args.keyword, max_pages=args.pages)
-        all_articles.extend(naver.crawl())
+    for kw in keywords:
+        print(f"\n--- 키워드: '{kw}' ---")
+        if args.source in ("all", "naver"):
+            naver = NaverNewsCrawler(kw, max_pages=args.pages)
+            all_articles.extend(naver.crawl())
 
-    if args.source in ("all", "google"):
-        google = GoogleNewsCrawler(args.keyword)
-        all_articles.extend(google.crawl())
+        if args.source in ("all", "google"):
+            lang_settings = []
+            if args.lang in ("ko", "both"):
+                lang_settings.append(("ko", "KR"))
+            if args.lang in ("en", "both"):
+                lang_settings.append(("en", "US"))
+
+            for lang, country in lang_settings:
+                print(f"  [Google {lang.upper()}]")
+                google = GoogleNewsCrawler(kw, lang=lang, country=country)
+                all_articles.extend(google.crawl())
 
     # 중복 제거
     articles = merge_and_deduplicate(all_articles)
@@ -101,7 +123,8 @@ def main():
 
     # 저장
     if articles:
-        save_results(articles, args.keyword)
+        label = "_".join(keywords)
+        save_results(articles, label)
 
 
 if __name__ == "__main__":

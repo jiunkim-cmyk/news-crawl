@@ -26,8 +26,29 @@ news-crawl/
 - BeautifulSoup / Requests (크롤링)
 - Pandas (데이터 처리)
 
-## 시작하기
+## 사용법
 
 ```bash
 pip install -r requirements.txt
+
+# 기본 실행 (다리마티 키워드, 네이버+구글, 한국어+영어)
+python main.py
+
+# 커스텀 키워드 검색
+python main.py -k "DARIMATI BR-001" "DARIMATI running shoe" "다리마티"
+
+# 구글 뉴스만, 영어만
+python main.py -k "DARIMATI" -s google -l en
+
+# 네이버 5페이지 검색
+python main.py -k "다리마티" -s naver -p 5
 ```
+
+### 옵션
+
+| 옵션 | 설명 | 기본값 |
+|------|------|--------|
+| `-k, --keyword` | 검색 키워드 (복수 가능) | 다리마티 |
+| `-s, --source` | 크롤링 소스 (all/naver/google) | all |
+| `-l, --lang` | Google News 언어 (ko/en/both) | both |
+| `-p, --pages` | 네이버 검색 페이지 수 | 3 |

@@ -1,5 +1,6 @@
 import json
 from typing import List, Dict
+from urllib.parse import quote_plus
 
 import feedparser
 from datetime import datetime
@@ -22,7 +23,7 @@ class GoogleNewsCrawler:
 
         url = (
             f"{self.RSS_URL}"
-            f"?q={self.keyword}"
+            f"?q={quote_plus(self.keyword)}"
             f"&hl={self.lang}"
             f"&gl={self.country}"
             f"&ceid={self.country}:{self.lang}"
